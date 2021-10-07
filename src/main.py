@@ -1,13 +1,13 @@
-import atexit
 import os
+import signal
 from typing import Union
+
 from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.triggers.cron import CronTrigger
 
 
-# power on all ports when program exit
-@atexit.register
 def reset_power_status():
+    print('before dprogram exit!!!')
     os.system('sudo uhubctl -l 2 -a 1')
 
 
@@ -35,10 +35,20 @@ if __name__ == '__main__':
 
     # scheduler.add_job(switch_power, CronTrigger(second='*/10'), args=[2, '', '1'])
 
-    # job to switch power on at 20:00 everyday
-    scheduler.add_job(switch_power, CronTrigger(hour='20'), args=[2, '', '1'])
+    # job to switch power on at 21:00 from monday to friday
+    scheduler.add_job(switch_power, CronTrigger(day_of_week='0-4', hour='21'), args=[2, '', '1'])
 
-    # job to switch power off at 07:00 everyday
-    scheduler.add_job(switch_power, CronTrigger(hour='7'), args=[2, '', '0'])
+    # job to switch power off at 07:00 everyday  from monday to friday
+    scheduler.add_job(switch_power, CronTrigger(day_of_week='0-4', hour='7'), args=[2, '', '0'])
+
+    # job to switch power on at 07:00 on the saturday
+    scheduler.add_job(switch_power, CronTrigger(day_of_week='5', hour='7'), args=[2, '', '1'])
+
+    # job to switch power off at 21:00 on sunday
+    scheduler.add_job(switch_power, CronTrigger(day_of_week='6', hour='21'), args=[2, '', '0'])
+
+    # power on all ports when program exit
+    signal.signal(signal.SIGTERM, reset_power_status)  # when program terminated by kill -15
+    signal.signal(signal.SIGINT, reset_power_status)  # when program terminated by kill -2
 
     scheduler.start()

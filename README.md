@@ -18,10 +18,10 @@ $ uhubctl -l 2 -a off -p 2
 
 ### B. run the python script in background
 
-1. using the `nuhup` command to start
+1. using the `nohup` command to start
 
 ```shell
-(venv)$ nuhup python -u main.py
+(venv)$ nohup python -u main.py &
 ```
 
 2. find the process id
